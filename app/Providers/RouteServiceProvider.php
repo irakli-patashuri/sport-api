@@ -46,7 +46,8 @@ class RouteServiceProvider extends ServiceProvider
     protected function configureRateLimiting()
     {
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            // Live sports clients poll + socket-triggered refetches heavily.
+            return Limit::perMinute(600)->by($request->user()?->id ?: $request->ip());
         });
     }
 }

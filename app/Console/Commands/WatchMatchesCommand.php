@@ -40,8 +40,12 @@ class WatchMatchesCommand extends Command
             $since = Carbon::now();
 
             foreach ($ids as $id) {
-                if ($broadcastService->broadcastMatchUpdated((int) $id)) {
-                    $this->line('['.now()->toTimeString()."] broadcasted match #{$id}");
+                try {
+                    if ($broadcastService->broadcastMatchUpdated((int) $id)) {
+                        $this->line('['.now()->toTimeString()."] broadcasted match #{$id}");
+                    }
+                } catch (\Throwable $e) {
+                    $this->error('['.now()->toTimeString()."] match #{$id} broadcast failed: ".$e->getMessage());
                 }
             }
 
