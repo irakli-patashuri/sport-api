@@ -2,14 +2,18 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
     /**
-     * A list of exception types with their corresponding custom log levels.
-     *
      * @var array<class-string<\Throwable>, \Psr\Log\LogLevel::*>
      */
     protected $levels = [
@@ -17,8 +21,6 @@ class Handler extends ExceptionHandler
     ];
 
     /**
-     * A list of the exception types that are not reported.
-     *
      * @var array<int, class-string<\Throwable>>
      */
     protected $dontReport = [
@@ -26,8 +28,6 @@ class Handler extends ExceptionHandler
     ];
 
     /**
-     * A list of the inputs that are never flashed to the session on validation exceptions.
-     *
      * @var array<int, string>
      */
     protected $dontFlash = [
@@ -36,26 +36,74 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
-    /**
-     * Register the exception handling callbacks for the application.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
         $this->reportable(function (Throwable $e) {
             //
         });
     }
 
-    protected function unauthenticated($request, \Illuminate\Auth\AuthenticationException $exception)
+    public function render($request, Throwable $e)
     {
-        // Always return JSON for API routes
-        if ($request->is('api/*') || $request->expectsJson()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        if ($this->isApiRequest($request)) {
+            if ($e instanceof ValidationException) {
+                return $this->apiError(
+                    'Validation failed',
+                    $e->errors(),
+                    422
+                );
+            }
+
+            if ($e instanceof NotFoundHttpException) {
+                return $this->apiError('Resource not found', null, 404);
+            }
+
+            if ($e instanceof AuthenticationException) {
+                return $this->apiError('Unauthenticated', null, 401);
+            }
+
+            if ($e instanceof HttpExceptionInterface) {
+                return $this->apiError(
+                    $e->getMessage() !== '' ? $e->getMessage() : 'HTTP error',
+                    null,
+                    $e->getStatusCode()
+                );
+            }
+
+            if (config('app.debug')) {
+                return $this->apiError($e->getMessage(), [
+                    'exception' => class_basename($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ], 500);
+            }
+
+            return $this->apiError('Internal server error', null, 500);
         }
 
-        // Otherwise, perform the default behavior (for web routes)
+        return parent::render($request, $e);
+    }
+
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        if ($this->isApiRequest($request) || $request->expectsJson()) {
+            return $this->apiError('Unauthenticated', null, 401);
+        }
+
         return redirect()->guest(route('login'));
+    }
+
+    private function isApiRequest(Request $request): bool
+    {
+        return $request->is('api/*') || $request->expectsJson();
+    }
+
+    private function apiError(string $message, mixed $errors, int $status): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'errors' => $errors,
+            'message' => $message,
+        ], $status);
     }
 }

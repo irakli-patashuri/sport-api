@@ -1,5 +1,8 @@
 <?php
 
+// PHP 8.5 + Laravel 9 vendor deprecations otherwise leak into JSON responses
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
