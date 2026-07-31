@@ -1,6 +1,9 @@
 #!/usr/bin/env php
 <?php
 
+// PHP 8.5 + Laravel 9: silence vendor deprecation noise in CLI
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
 define('LARAVEL_START', microtime(true));
 
 /*

@@ -2,10 +2,17 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "soketi": "soketi start --config=./soketi.json",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:stop": "pm2 stop sport-soketi",
+    "pm2:restart": "pm2 restart sport-soketi",
+    "pm2:logs": "pm2 logs sport-soketi",
+    "pm2:status": "pm2 status sport-soketi"
   },
   "devDependencies": {
     "@popperjs/core": "^2.11.6",
+    "@soketi/soketi": "^1.6.1",
     "@vitejs/plugin-react": "^4.2.0",
     "axios": "^1.1.2",
     "bootstrap": "^5.2.3",

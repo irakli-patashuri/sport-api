@@ -38,4 +38,5 @@ Route::prefix('teams')->group(function () {
 Route::prefix('matches')->group(function () {
     Route::get('/', [MatchController::class, 'index']);
     Route::get('/{id}', [MatchController::class, 'show'])->whereNumber('id');
+    Route::post('/{id}/notify', [MatchController::class, 'notify'])->whereNumber('id');
 });
