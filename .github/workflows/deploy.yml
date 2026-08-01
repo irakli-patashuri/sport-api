@@ -1,43 +1,43 @@
-name: Laravel Deploy
+name: Deploy sport-api
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploying to Server
-        uses: appleboy/ssh-action@master
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}  
-          port: 22 
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
           script: |
-            cd /var/www/netspor-laravel-api
-            git config --global --add safe.directory /var/www/netspor-laravel-api
+            set -e
+            APP_DIR=/var/www/netspor-laravel-api
+            cd "$APP_DIR"
+
+            git config --global --add safe.directory "$APP_DIR"
             git fetch origin main
             git reset --hard origin/main
-            
-            if [ -d "netspor-laravel-api" ]; then
-              cp -rl netspor-laravel-api/. .
-              rm -rf netspor-laravel-api
-            fi
 
-            composer install --no-interaction --prefer-dist --optimize-autoloader
+            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
             php artisan migrate --force
             php artisan optimize:clear
             php artisan config:cache
-            php artisan agora:sync-env
-            php artisan route:cache
             php artisan view:cache
+            # Avoid route:cache behind Apache Alias / subdirectory — can break GET /
+            php artisan route:clear
             php artisan storage:link || true
-            chmod -R 775 storage bootstrap/cache
-            chown -R www-data:www-data .
-            php artisan queue:restart
 
+            chmod -R 775 storage bootstrap/cache || true
 
+            curl -sf "http://127.0.0.1/netspor-laravel-api/api/health" \
+              || curl -sf "http://127.0.0.1/netspor-laravel-api/api/v1/countries?per_page=1" \
+              || echo "WARN: health probe failed (check Apache vhost)"
 
-
+            echo "Deploy OK — sport-api"
