@@ -6,9 +6,13 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
+|
+| Public health/info for subdirectory installs (Apache Alias).
+| Use match GET+HEAD — some proxies probe with HEAD only.
+|
 */
 
-Route::get('/', function () {
+Route::match(['GET', 'HEAD'], '/', function () {
     return response()->json([
         'success' => true,
         'data' => [

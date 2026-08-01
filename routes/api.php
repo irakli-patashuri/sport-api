@@ -22,5 +22,10 @@ Route::prefix('v2')->group(function () {
     // Breaking changes go here later.
 });
 
+/** Always-on health (no DB) — use this instead of GET / behind Apache Alias. */
+Route::match(['GET', 'HEAD'], '/health', function () {
+    return response()->json(['ok' => true, 'service' => 'sport-api']);
+});
+
 // Legacy auth group (existing app routes) — enable when controllers exist
 // Route::prefix('auth')->group(__DIR__.'/auth_routes.php');
