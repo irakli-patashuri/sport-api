@@ -1,0 +1,43 @@
+name: Laravel Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploying to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}  
+          port: 22 
+          script: |
+            cd /var/www/netspor-laravel-api
+            git config --global --add safe.directory /var/www/netspor-laravel-api
+            git fetch origin main
+            git reset --hard origin/main
+            
+            if [ -d "netspor-laravel-api" ]; then
+              cp -rl netspor-laravel-api/. .
+              rm -rf netspor-laravel-api
+            fi
+
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+            php artisan migrate --force
+            php artisan optimize:clear
+            php artisan config:cache
+            php artisan agora:sync-env
+            php artisan route:cache
+            php artisan view:cache
+            php artisan storage:link || true
+            chmod -R 775 storage bootstrap/cache
+            chown -R www-data:www-data .
+            php artisan queue:restart
+
+
+
+
