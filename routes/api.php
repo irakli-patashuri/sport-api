@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     require __DIR__.'/sport_routes.php';
+    require __DIR__.'/app_routes.php';
 });
 
 Route::prefix('v2')->group(function () {
