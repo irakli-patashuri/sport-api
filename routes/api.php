@@ -1,6 +1,4 @@
 <?php
- 
-// TEST FOR DEPLOY 4
 
 use Illuminate\Support\Facades\Route;
 
