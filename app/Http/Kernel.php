@@ -54,7 +54,8 @@ class Kernel extends HttpKernel
      *
      * @var array<string, class-string|string>
      */
-    protected $routeMiddleware = [ 
+    protected $routeMiddleware = [
+        'app.secret' => \App\Http\Middleware\VerifyAppClientSecret::class,
         'admin.guard' => \App\Http\Middleware\AdminGuard::class,
         'UpdateLastActivity'=> \App\Http\Middleware\UpdateLastActivity::class,
         'auth:affiliates' => \App\Http\Middleware\AuthenticateAffiliate::class,

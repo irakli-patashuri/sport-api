@@ -13,7 +13,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('v1')->group(function () {
+// `app.secret` gates every /api/v1 route on the NETSPOR app's shared header
+// (see VerifyAppClientSecret) — runs before auth:sanctum, so an endpoint
+// isn't reachable at all from a browser tab or an unrelated client, whether
+// or not it also requires a logged-in user.
+Route::prefix('v1')->middleware('app.secret')->group(function () {
     require __DIR__.'/sport_routes.php';
     require __DIR__.'/app_routes.php';
 });

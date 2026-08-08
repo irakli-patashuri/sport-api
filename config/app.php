@@ -19,6 +19,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | NETSPOR App Shared Secret
+    |--------------------------------------------------------------------------
+    |
+    | Every /api/v1 request must carry this value in the X-App-Secret header
+    | (see App\Http\Middleware\VerifyAppClientSecret) — blocks anything that
+    | isn't the NETSPOR app itself from reaching the API. Generate a random
+    | value once (e.g. `openssl rand -hex 32`) and set APP_CLIENT_SECRET in
+    | .env; the same value goes into NETSPOR's EXPO_PUBLIC_APP_CLIENT_SECRET.
+    |
+    */
+
+    'client_secret' => env('APP_CLIENT_SECRET'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |
