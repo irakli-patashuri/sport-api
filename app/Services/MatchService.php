@@ -72,6 +72,8 @@ class MatchService
                 'league:id,name,sport_id,country_id',
                 'homeTeam:id,name',
                 'awayTeam:id,name',
+                'matchLink.sportradarMatch.tournament',
+                'matchLink.sportradarMatch.timeline',
             ])
             ->find($id);
     }

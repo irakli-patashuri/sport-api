@@ -48,6 +48,15 @@ class MatchResource extends JsonResource
                 'events',
                 fn () => MatchEventResource::collection($this->events)
             ),
+            // Sportradar-sourced enrichment (stats/timeline/tournament), derived by
+            // sport-node-api's team-name + kickoff-time linker — absent unless a
+            // confident link was found. See App\Models\MatchLink.
+            'sportradar' => $this->whenLoaded(
+                'matchLink',
+                fn () => $this->matchLink
+                    ? new SportradarResource($this->matchLink)
+                    : ['linked' => false]
+            ),
             'updated_at' => optional($this->updated_at)?->toIso8601String(),
         ];
     }

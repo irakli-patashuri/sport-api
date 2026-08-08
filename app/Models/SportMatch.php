@@ -95,4 +95,14 @@ class SportMatch extends Model
     {
         return $this->hasMany(MatchEvent::class, 'match_id');
     }
+
+    /**
+     * Derived cross-reference to the matching Sportradar match, if
+     * sport-node-api's team-name/kickoff-time linker found a confident one.
+     * See App\Models\MatchLink.
+     */
+    public function matchLink(): HasOne
+    {
+        return $this->hasOne(MatchLink::class, 'swarm_match_id');
+    }
 }
